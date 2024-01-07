@@ -1,17 +1,35 @@
-import { View, Text, TouchableHighlight } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { Entypo } from '@expo/vector-icons';
 import { useState } from 'react';
+import { View, Text, TouchableHighlight } from 'react-native';
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 
-export default function Patient({
-	onPress,
-}: {
+import type { CurrentPatientsData } from '../types';
+
+interface Props extends CurrentPatientsData {
 	onPress: () => void;
-}): JSX.Element {
+}
+
+export default function Patient({ onPress, ...item }: Props): JSX.Element {
 	const [focus, setFocus] = useState(false);
 
 	const handleFocus = () => setFocus(true);
 	const handleBlur = () => setFocus(false);
+
+	const renderGender = {
+		male: (
+			<FontAwesome name='male' size={24} color={focus ? '#ef233c' : 'white'} />
+		),
+		female: (
+			<FontAwesome name='female' size={24} color={focus ? '#ef233c' : 'white'} />
+		),
+		rather_not_say: (
+			<FontAwesome5
+				name='question'
+				size={24}
+				color={focus ? '#ef233c' : 'white'}
+			/>
+		),
+	};
 
 	return (
 		<TouchableHighlight
@@ -29,11 +47,7 @@ export default function Patient({
 						className={`w-16 h-16 rounded-full ${
 							focus ? 'bg-white' : 'bg-[#ef233c]'
 						} flex items-center justify-center`}>
-						<FontAwesome
-							name='male'
-							size={24}
-							color={focus ? '#ef233c' : 'white'}
-						/>
+						{renderGender[item?.gender]}
 					</View>
 					<View className='h-full flex flex-col justify-center ml-4'>
 						<View
@@ -44,7 +58,7 @@ export default function Patient({
 								className={`text-sx font-bold ${
 									focus ? 'text-[#ef233c]' : 'text-white'
 								} `}>
-								{new Date().toDateString()}
+								{new Date(item?.created_at).toDateString()}
 							</Text>
 						</View>
 						<View className='flex flex-col'>
@@ -52,13 +66,13 @@ export default function Patient({
 								className={`text-2xl font-bold ${
 									focus ? 'text-white' : 'text-gray-600'
 								}`}>
-								Harris Iqbal
+								{item?.name}
 							</Text>
 							<Text
 								className={`text-sx font-bold ${
 									focus ? 'text-white' : 'text-gray-600'
 								}`}>
-								+92 (344-8112277)
+								{item?.additional_details?.phone}
 							</Text>
 						</View>
 					</View>
@@ -72,7 +86,7 @@ export default function Patient({
 							className={`text-sx font-bold ${
 								focus ? 'text-[#ef233c]' : 'text-white'
 							}`}>
-							A+
+							{item?.additional_details.blood_group}
 						</Text>
 					</View>
 					<Entypo

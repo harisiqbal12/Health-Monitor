@@ -38,7 +38,7 @@ export default function Home({ navigation }: Props): JSX.Element {
 	};
 
 	const renderItem: ListRenderItem<CurrentPatientsData> = ({ item, index }) => {
-		return <Patient onPress={() => navigatePatientDetail(item?.id)} />;
+		return <Patient onPress={() => navigatePatientDetail(item?.id)} {...item} />;
 	};
 
 	return (

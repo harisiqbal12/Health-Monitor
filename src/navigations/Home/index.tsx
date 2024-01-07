@@ -23,6 +23,7 @@ export default function HomeNavigator(): JSX.Element {
 					headerShown: false,
 					statusBarStyle: 'dark',
 					statusBarTranslucent: true,
+					animation: 'slide_from_bottom',
 				}}
 				component={Patient}
 			/>
