@@ -6,4 +6,5 @@ export type AuthContextProps = {
 	user: UserProps;
 	handleLogout: () => void;
 	handleUser: (props: UserProps) => void;
+	setToken: (token: string) => Promise<void>;
 };

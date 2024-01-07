@@ -1,18 +1,24 @@
-import { useContext } from 'react';
+import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
 import AuthNavigator from './Auth';
-import { AuthContext } from '../context';
-import { AuthContextProps } from '../types';
+import HomeNavigator from './Home';
+import useAuth from '../hooks/useAuth';
 
 export default function AppNavigator(): JSX.Element {
-	const { user } = useContext(AuthContext) as AuthContextProps;
+	const [user] = useAuth();
 
 	if (user.isAuthenticated === null) {
 		// show loading state
+		return <ActivityIndicator />;
 	}
 
 	if (user.isAuthenticated === false) {
+		return (
+			<NavigationContainer>
+				<AuthNavigator />
+			</NavigationContainer>
+		);
 		// show auth navigator
 	}
 
@@ -20,7 +26,7 @@ export default function AppNavigator(): JSX.Element {
 
 	return (
 		<NavigationContainer>
-			<AuthNavigator />
+			<HomeNavigator />
 		</NavigationContainer>
 	);
 }
