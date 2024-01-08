@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { Home, Patient } from '../../screens';
+import { Home, Patient, Profile } from '../../screens';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +26,15 @@ export default function HomeNavigator(): JSX.Element {
 					animation: 'slide_from_bottom',
 				}}
 				component={Patient}
+			/>
+			<Stack.Screen
+				name='Profile'
+				options={{
+					headerShown: false,
+					statusBarStyle: 'dark',
+					statusBarTranslucent: true,
+				}}
+				component={Profile}
 			/>
 		</Stack.Navigator>
 	);

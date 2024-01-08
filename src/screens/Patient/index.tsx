@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 	},
 });
 
-type Props = NativeStackScreenProps<AppScreenProps, 'Home'>;
+type Props = NativeStackScreenProps<AppScreenProps, 'Patient'>;
 
 function ModalScreen({ navigation, route }: Props) {
 	const animate: any = useRef(new Animated.Value(0)).current;

@@ -45,9 +45,12 @@ function useLazyFetch<T>(options?: {
 					parameters.body = body.toString();
 				}
 
-				if (user?.token) {
+				if (authentication) {
 					headers.append('Authorization', `Bearer ${user?.token}`);
 				}
+
+				console.log(headers)
+				console.log("token: ", user?.token)
 
 				const res = await fetch(api, {
 					...parameters,

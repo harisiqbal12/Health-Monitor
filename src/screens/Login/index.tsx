@@ -98,6 +98,7 @@ export default function Login(): JSX.Element {
 				name: res?.user?.name,
 				user_role: res?.user?.user_role,
 				id: res?.user?.id,
+				token: res?.access_token,
 			});
 		} catch (err) {}
 	}, [user]);

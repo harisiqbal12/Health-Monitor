@@ -76,6 +76,10 @@ export const AuthProvider: ContextFunc = ({ children }) => {
 	}, []);
 
 	const setToken = useCallback(async (token: string) => {
+		setUser(prev => ({
+			...prev,
+			token,
+		}));
 		await AsyncStorage.setItem('token', token);
 	}, []);
 
@@ -89,6 +93,13 @@ export const AuthProvider: ContextFunc = ({ children }) => {
 			id: null,
 			token: null,
 		});
+		AsyncStorage.removeItem('token')
+			.then(() => {
+				console.log('token removed');
+			})
+			.catch(() => {
+				console.log('error occured during logout');
+			});
 	}, []);
 
 	const value: AuthContextProps = {
