@@ -49,6 +49,14 @@ export type CurrentPatientsData = {
 		created_at: string;
 		updated_at: null;
 	}>;
+	history: Array<{
+		spo2_reading: number;
+		bp_reading: number;
+		temp_reading: number;
+		heartbeat_reading: number;
+		id: number;
+		created_at: string;
+	}>;
 };
 
 export type Gender = 'male' | 'female' | 'rather_not_say';

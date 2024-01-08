@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { useContext, useEffect, useRef } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useEffect, useRef } from 'react';
 import {
 	Animated,
 	View,
@@ -9,6 +10,19 @@ import {
 	useWindowDimensions,
 	ScrollView,
 } from 'react-native';
+import {
+	LineChart,
+	BarChart,
+	PieChart,
+	ProgressChart,
+	ContributionGraph,
+	StackedBarChart,
+} from 'react-native-chart-kit';
+
+import { useLazyFetch } from '../../hooks';
+
+import type { AppScreenProps, CurrentPatientsData } from '../../types';
+import { api } from '../../common';
 
 const styles = StyleSheet.create({
 	viewAnimated: {
@@ -21,10 +35,19 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 });
-//@ts-ignore
-function ModalScreen({ navigation }) {
+
+type Props = NativeStackScreenProps<AppScreenProps, 'Home'>;
+
+function ModalScreen({ navigation, route }: Props) {
 	const animate: any = useRef(new Animated.Value(0)).current;
 	const { height } = useWindowDimensions();
+
+	const headers = new Headers();
+
+	const [loading, error, handleFetch, data] = useLazyFetch<CurrentPatientsData>({
+		showToast: true,
+		vibrateOnError: true,
+	});
 
 	useEffect(() => {
 		const animation = Animated.timing(animate, {
@@ -39,6 +62,17 @@ function ModalScreen({ navigation }) {
 			animation.reset();
 		};
 	}, []);
+
+	useEffect(() => {
+		handleFetch({
+			api: `${api.PATIENTDETAIL}/${route?.params?.patientId}`,
+			method: 'GET',
+			headers: headers,
+			authentication: true,
+		});
+	}, [route]);
+
+	console.log(data?.history?.map(el => el?.spo2_reading));
 
 	return (
 		<View className='w-full items-center justify-center'>
@@ -75,13 +109,11 @@ function ModalScreen({ navigation }) {
 							</View>
 						</View>
 						<View className='flex flex-col items-center'>
-							<Text className='text-white font-bold text-2xl'>Haris Iqbal</Text>
+							<Text className='text-white font-bold text-2xl'>{data?.name}</Text>
 							<Text className='text-white text-sx font-bold'>
-								+92 (344-8112277)
+								{data?.additional_details?.phone}
 							</Text>
-							<Text className='text-white text-sx font-bold'>
-								haris.iqbal@appiskey.com
-							</Text>
+							<Text className='text-white text-sx font-bold'>{data?.email}</Text>
 						</View>
 					</View>
 					<ScrollView>
@@ -91,7 +123,9 @@ function ModalScreen({ navigation }) {
 							</Text>
 							<View className='w-full flex flex-row items-center mt-4'>
 								<View className='w-[33%] h-32 rounded-xl bg-white flex items-center justify-center flex-col'>
-									<Text className='text-4xl font-black text-gray-600'>24</Text>
+									<Text className='text-4xl font-black text-gray-600'>
+										{data?.additional_details?.age}
+									</Text>
 									<Text className='text-xs font-semibold text-gray-400'>Age</Text>
 								</View>
 								<View className='w-[33%] h-32 rounded-xl bg-white flex items-center justify-center flex-col mx-2'>
@@ -99,7 +133,11 @@ function ModalScreen({ navigation }) {
 									<Text className='text-xs font-semibold text-gray-400'>BMI</Text>
 								</View>
 								<View className='w-[31%] h-32 rounded-xl bg-white flex items-center justify-center flex-col'>
-									<Text className='text-4xl font-black text-gray-600'>A+</Text>
+									<Text className='text-4xl font-black text-gray-600'>
+										{data?.additional_details?.blood_group === 'Unknown'
+											? '?'
+											: data?.additional_details?.blood_group}
+									</Text>
 									<Text className='text-xs font-semibold text-gray-400'>
 										Blood Group
 									</Text>
@@ -107,25 +145,150 @@ function ModalScreen({ navigation }) {
 							</View>
 						</View>
 						<View className='w-full flex flex-col px-4 pb-40'>
-							<View className='w-full flex h-60 bg-orange-200 rounded-xl p-4 '>
-								<Text className='font-bold text-orange-50 uppercase'>
-									Temperature
-								</Text>
+							<View className='w-full flex h-60 bg-orange-200 rounded-xl p-4 flex-col '>
+								<View className='w-full flex h-full items-center justify-center'>
+									{data?.history?.map(el => el?.temp_reading)?.length ? (
+										<LineChart
+											data={{
+												labels: ['', '', '', '', '', '', '', '', '', ''],
+												datasets: [
+													{
+														data: data?.history?.map(el => el?.temp_reading),
+													},
+												],
+												legend: ['Temperature'],
+											}}
+											width={350}
+											height={200}
+											verticalLabelRotation={20}
+											chartConfig={{
+												backgroundColor: '#000000',
+												backgroundGradientFrom: '#fb8c00',
+												backgroundGradientTo: '#ffa726',
+												decimalPlaces: 2, // optional, defaults to 2dp
+												color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+												labelColor: (opacity = 1) =>
+													`rgba(255, 255, 255, ${opacity})`,
+												style: {
+													borderRadius: 100,
+												},
+											}}
+											bezier
+											style={{
+												borderRadius: 10,
+											}}
+										/>
+									) : (
+										<></>
+									)}
+								</View>
 							</View>
-							<View className='w-full flex h-60 bg-rose-200 rounded-xl mt-4 p-4'>
-								<Text className='font-bold text-orange-50 uppercase'>
-									Heartbeat
-								</Text>
+							<View className='w-full flex h-60 bg-rose-200 rounded-xl mt-4 p-4 items-center justify-center'>
+								{data?.history?.map(el => el?.heartbeat_reading)?.length ? (
+									<LineChart
+										data={{
+											labels: ['', '', '', '', '', '', '', '', '', ''],
+											datasets: [
+												{
+													data: data?.history?.map(el => el?.heartbeat_reading),
+												},
+											],
+											legend: ['Heart Beat'],
+										}}
+										width={350}
+										height={200}
+										verticalLabelRotation={20}
+										chartConfig={{
+											backgroundColor: '#000000',
+											backgroundGradientFrom: '#fecdd3',
+											backgroundGradientTo: '#ec4899',
+											decimalPlaces: 2, // optional, defaults to 2dp
+											color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+											labelColor: (opacity = 1) =>
+												`rgba(255, 255, 255, ${opacity})`,
+											style: {
+												borderRadius: 100,
+											},
+										}}
+										style={{
+											borderRadius: 10,
+										}}
+									/>
+								) : (
+									<></>
+								)}
 							</View>
-							<View className='w-full flex h-60 bg-emerald-300 rounded-xl mt-4 p-4'>
-								<Text className='font-bold text-orange-50 uppercase'>
-									Oxygen
-								</Text>
+							<View className='w-full flex h-60 bg-emerald-300 rounded-xl mt-4 p-4 items-center justify-center'>
+								{data?.history?.map(el => el?.spo2_reading)?.length ? (
+									<LineChart
+										data={{
+											labels: ['', '', '', '', '', '', '', '', '', ''],
+											datasets: [
+												{
+													data: data?.history?.map(el => el?.spo2_reading),
+												},
+											],
+											legend: ['Oxygen'],
+										}}
+										width={350}
+										height={200}
+										verticalLabelRotation={20}
+										chartConfig={{
+											backgroundColor: '#000000',
+											backgroundGradientFrom: '#6ee7b7',
+											backgroundGradientTo: '#10b981',
+											decimalPlaces: 2, // optional, defaults to 2dp
+											color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+											labelColor: (opacity = 1) =>
+												`rgba(255, 255, 255, ${opacity})`,
+											style: {
+												borderRadius: 100,
+											},
+										}}
+										bezier
+										style={{
+											borderRadius: 10,
+										}}
+									/>
+								) : (
+									<></>
+								)}
 							</View>
-							<View className='w-full flex h-60 bg-red-300 rounded-xl mt-4 p-4'>
-								<Text className='font-bold text-orange-50 uppercase'>
-									Blood Pressure
-								</Text>
+							<View className='w-full flex h-60 bg-red-300 rounded-xl mt-4 p-4 items-center justify-center'>
+								{data?.history?.map(el => el?.bp_reading)?.length ? (
+									<LineChart
+										data={{
+											labels: ['', '', '', '', '', '', '', '', '', ''],
+											datasets: [
+												{
+													data: data?.history?.map(el => el?.bp_reading),
+												},
+											],
+											legend: ['Blood Pressure'],
+										}}
+										width={350}
+										height={200}
+										verticalLabelRotation={20}
+										chartConfig={{
+											backgroundColor: '#000000',
+											backgroundGradientFrom: '#fca5a5',
+											backgroundGradientTo: '#ef4444',
+											decimalPlaces: 2, // optional, defaults to 2dp
+											color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+											labelColor: (opacity = 1) =>
+												`rgba(255, 255, 255, ${opacity})`,
+											style: {
+												borderRadius: 100,
+											},
+										}}
+										bezier
+										style={{
+											borderRadius: 10,
+										}}
+									/>
+								) : (
+									<></>
+								)}
 							</View>
 						</View>
 					</ScrollView>

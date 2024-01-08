@@ -11,7 +11,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<AppScreenProps, 'Home'>;
 
-export default function Home({ navigation }: Props): JSX.Element {
+export default function Home({ navigation,  }: Props): JSX.Element {
 	const [loading, error, handleFetch, data] = useLazyFetch<{
 		items: Array<CurrentPatientsData>;
 	}>();

@@ -24,39 +24,50 @@ export const AuthProvider: ContextFunc = ({ children }) => {
 
 	useEffect(() => {
 		(async () => {
-			const token = await AsyncStorage.getItem('token');
-			if (token) {
-				headers.append('Authorization', `Bearer ${token}`);
-				headers.append('accept', 'application/json');
+			try {
+				const token = await AsyncStorage.getItem('token');
+				if (token) {
+					headers.append('Authorization', `Bearer ${token}`);
+					headers.append('accept', 'application/json');
 
-				const apiResponse = await fetch(api.USERME, {
-					method: 'GET',
-					headers,
-				});
+					const apiResponse = await fetch(api.USERME, {
+						method: 'GET',
+						headers,
+					});
 
-				const res = await apiResponse.json();
-				if (!apiResponse.ok) throw new Error(res?.detail);
+					const res = await apiResponse.json();
+					if (!apiResponse.ok) throw new Error(res?.detail);
 
+					setUser({
+						isAuthenticated: !!res?.email,
+						email: res?.email,
+						imageURI: null,
+						name: res?.name,
+						user_role: res?.user_role,
+						id: res?.id,
+						token,
+					});
+
+					return;
+				}
 				setUser({
-					isAuthenticated: !!res?.email,
-					email: res?.email,
+					isAuthenticated: false,
+					email: null,
 					imageURI: null,
-					name: res?.name,
-					user_role: res?.user_role,
-					id: res?.id,
-					token,
+					name: null,
+					user_role: null,
+					id: null,
 				});
-
-				return;
+			} catch (err) {
+				setUser({
+					isAuthenticated: false,
+					email: null,
+					imageURI: null,
+					name: null,
+					user_role: null,
+					id: null,
+				});
 			}
-			setUser({
-				isAuthenticated: false,
-				email: null,
-				imageURI: null,
-				name: null,
-				user_role: null,
-				id: null,
-			});
 		})();
 	}, []);
 
